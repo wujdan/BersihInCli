@@ -1,0 +1,46 @@
+# --- Binari hasil build ---
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.bin
+storage-optimizer
+bersihin
+
+# --- Editor / IDE ---
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# --- Sistem operasi ---
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# --- Data aplikasi lokal (jangan pernah di-commit) ---
+# Folder data runtime bila dijalankan dari dalam repo
+.storage-optimizer/
+
+# --- Hasil config yang di-generate ---
+config/default.new.yaml
+
+# --- Go ---
+# Binary test
+*.test
+*.out
+coverage.*
+# Profiling
+*.prof
+*.pprof
+
+# --- Artefak sementara / log ---
+*.log
+logs/
+tmp/
+dist/
+build/
