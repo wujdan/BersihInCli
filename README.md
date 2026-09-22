@@ -163,4 +163,4 @@ Pull request dan issue diterima di GitHub. Dokumentasi lengkap: `Dokumentasi-Alu
 
 ## Lisensi
 
-[MIT](LICENSE) © 2026 Danss
+[MIT](LICENSE) © 2026 wujdan
