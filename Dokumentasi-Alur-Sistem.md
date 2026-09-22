@@ -327,6 +327,7 @@ storage-optimizer review   # dashboard hasil scan terakhir
 storage-optimizer restore  # pulihkan file dari quarantine
 storage-optimizer purge    # hapus permanen isi quarantine
 storage-optimizer config   # tampilkan / buat konfigurasi
+storage-optimizer uninstall  # hapus semua data aplikasi (karantina, laporan, log)
 ```
 
 ## 5.2 Scan
@@ -433,6 +434,19 @@ storage-optimizer purge --every=24h  # auto-purge terjadwal: periksa tiap 24 jam
 storage-optimizer config                # lihat konfigurasi aktif
 storage-optimizer config --generate     # buat file konfigurasi
 ```
+
+## 5.7 Uninstall (Hapus Semua Data Aplikasi)
+
+```bash
+storage-optimizer uninstall           # hapus semua data aplikasi (konfirmasi 'yes')
+storage-optimizer uninstall --force   # tanpa konfirmasi (untuk skrip/automasi)
+```
+
+Menghapus seluruh data aplikasi dari `~/.storage-optimizer`:
+file karantina **permanen** (tidak bisa dipulihkan), `manifest.json`,
+`reports/`, dan `logs/`. Binary `storage-optimizer` **tidak** terhapus —
+jika ingin dihapus penuh, jalankan `del storage-optimizer.exe` dan hapus
+folder hasil clone.
 
 ---
 

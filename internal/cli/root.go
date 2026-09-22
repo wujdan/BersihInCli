@@ -57,6 +57,7 @@ masa retensi.`,
 		newRestoreCmd(),
 		newPurgeCmd(),
 		newConfigCmd(),
+		newUninstallCmd(),
 	)
 
 	// graceful exit context

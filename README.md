@@ -23,19 +23,26 @@
 
 ```bash
 # Clone & build
-git clone https://github.com/wujdan/YukBersihIn.git
-cd YukBersihIn
+git clone https://github.com/wujdan/BersihInCli.git
+cd BersihInCli
 go build -o storage-optimizer.exe .
 
 # Atau langsung tanpa build
 go run . scan --mode=full
 ```
 
-### Syarat
+### Yang harus di-install dulu
 
-- Go 1.27 atau lebih baru
-- Windows (target utama), Linux, macOS
-- Terminal dengan dukungan ANSI/UTF-8
+| Kebutuhan | Versi | Untuk apa |
+|-----------|-------|-----------|
+| [Go](https://go.dev/dl/) | **1.27 atau lebih baru** | Meng-compile & menjalankan program `storage-optimizer` |
+| [Git](https://git-scm.com/downloads) | Versi terbaru | Meng-unduh (`clone`) kode dari GitHub |
+| Terminal (PowerShell / CMD) | — | Menjalankan perintah; wajib mendukung ANSI/UTF-8 untuk tampilan TUI |
+
+> **Catatan platform:**
+> - **Windows** (target utama) — deteksi kategori *Sisa Aplikasi Terhapus* hanya aktif di sini (membaca registry aplikasi terpasang), begitu pula pencarian drive lokal.
+> - **Linux / macOS** — program tetap bisa di-build & dipakai; hanya fitur orphan yang nonaktif (aman, tanpa deteksi palsu).
+> - Go tidak wajib setelah binary di-build — tetapi karena perintah `uninstall` tidak menghapus binary, pastikan `storage-optimizer.exe` berada di folder yang Anda ingat.
 
 ## Penggunaan (Usage)
 
@@ -51,6 +58,7 @@ go run . scan --mode=full
 | `purge`            | `storage-optimizer purge`                        | Hapus file yang lewat retensi           |
 |                    | `storage-optimizer purge --now`                  | Hapus semua sekarang (hati-hati!)       |
 | `config`           | `storage-optimizer config`                       | Tampilkan konfigurasi aktif             |
+| `uninstall`        | `storage-optimizer uninstall`                    | Hapus semua data aplikasi lewat CLI     |
 
 ### Flag Penting
 
@@ -64,6 +72,38 @@ go run . scan --mode=full
 | `--export`           | Ekspor ke CSV / TSV / JSON                   | —       |
 | `--every`            | Auto-purge daemon (mis. `--every=24h`)        | —       |
 | `--force`            | Lewati konfirmasi (untuk skrip)              | `false` |
+
+## Uninstal
+
+Ada dua cara; keduanya **tidak menghapus binary** — hapus manual setelahnya.
+
+### 1. Lewat CLI (disarankan)
+
+```bash
+# Hapus semua data aplikasi: file karantina, manifest, laporan, log audit
+storage-optimizer uninstall
+
+# Tanpa konfirmasi (untuk skrip/automasi)
+storage-optimizer uninstall --force
+```
+
+Yang terhapus:
+- `%USERPROFILE%\.storage-optimizer\quarantine\` — **semua file karantina (permanen, tidak bisa dipulihkan)**
+- `manifest.json`, `reports\*`, `logs\*`
+
+Lalu hapus binary & kodenya:
+
+```bash
+del storage-optimizer.exe        # dari folder build
+Remove-Item BersihInCli -Recurse -Force   # hapus folder clone
+```
+
+### 2. Manual (tanpa CLI)
+
+```powershell
+Remove-Item "$env:USERPROFILE\.storage-optimizer" -Recurse -Force
+del storage-optimizer.exe
+```
 
 ### Contoh Output
 
