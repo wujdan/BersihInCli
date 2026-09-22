@@ -37,11 +37,11 @@ go run . scan --mode=full
 |-----------|-------|-----------|
 | [Go](https://go.dev/dl/) | **1.27 atau lebih baru** | Meng-compile & menjalankan program `storage-optimizer` |
 | [Git](https://git-scm.com/downloads) | Versi terbaru | Meng-unduh (`clone`) kode dari GitHub |
-| Terminal (PowerShell / CMD) | — | Menjalankan perintah; wajib mendukung ANSI/UTF-8 untuk tampilan TUI |
+| Terminal (PowerShell / CMD) | - | Menjalankan perintah; wajib mendukung ANSI/UTF-8 untuk tampilan TUI |
 
 > **Catatan platform:**
 > - **Windows** (target utama) — deteksi kategori *Sisa Aplikasi Terhapus* hanya aktif di sini (membaca registry aplikasi terpasang), begitu pula pencarian drive lokal.
-> - **Linux / macOS** — program tetap bisa di-build & dipakai; hanya fitur orphan yang nonaktif (aman, tanpa deteksi palsu).
+> - **Linux / macOS** - program tetap bisa di-build & dipakai; hanya fitur orphan yang nonaktif (aman, tanpa deteksi palsu).
 > - Go tidak wajib setelah binary di-build — tetapi karena perintah `uninstall` tidak menghapus binary, pastikan `storage-optimizer.exe` berada di folder yang Anda ingat.
 
 ## Penggunaan (Usage)
