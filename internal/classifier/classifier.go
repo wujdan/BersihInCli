@@ -7,6 +7,7 @@ import (
 
 	"storage-optimizer/internal/config"
 	"storage-optimizer/internal/models"
+	"storage-optimizer/internal/orphan"
 )
 
 // importantExtensions are files never offered for deletion.
@@ -68,12 +69,15 @@ var logExtensions = map[string]bool{
 // Classifier labels files as candidates for deletion using
 // rule-based heuristics with confidence scores.
 type Classifier struct {
-	cfg *config.Config
+	cfg     *config.Config
+	orphans *orphan.Detector
 }
 
 // New creates a classifier bound to a config.
 func New(cfg *config.Config) *Classifier {
-	return &Classifier{cfg: cfg}
+	d := orphan.New()
+	d.Load()
+	return &Classifier{cfg: cfg, orphans: d}
 }
 
 // Classify evaluates a file and returns a Candidate if it is removable,
@@ -146,12 +150,27 @@ func (c *Classifier) Classify(f *models.FileMeta, dupGroup string) *models.Candi
 		}
 	}
 
-	// 6. Recently modified files are assumed actively used → safe.
+	// 6. Leftover data from uninstalled apps (orphan). Confidence stays
+	//    moderate because install-state detection is heuristic; labeling
+	//    review lets the user verify before removal.
+	if c.orphans != nil && c.orphans.Configured() {
+		if o := c.orphans.IsOrphan(f.Path); o != nil {
+			return &models.Candidate{
+				Meta:       f,
+				Label:      models.LabelReview,
+				Category:   models.CategoryOrphan,
+				Confidence: 0.62,
+				Reason:     "Data sisa aplikasi yang sudah dihapus: " + o.AppName,
+			}
+		}
+	}
+
+	// 7. Recently modified files are assumed actively used → safe.
 	if ageDays <= float64(c.cfg.Thresholds.ImportantAgeDays) {
 		return nil
 	}
 
-	// 7. Large files not accessed for a long time (lower confidence).
+	// 8. Large files not accessed for a long time (lower confidence).
 	//    Uses the latest of mod-time / access-time so a file that was just
 	//    read is never treated as abandoned.
 	lastUse := f.ModTime

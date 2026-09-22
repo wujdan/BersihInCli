@@ -55,8 +55,9 @@ func (a *App) executeMoves(_ context.Context, report *models.ScanReport, sel map
 		firstErr  error
 	)
 	var wg sync.WaitGroup
-	sem := make(chan struct{}, 4)
-	for _, c := range validated {
+	sem := make(chan struct{}, 8)
+	persistEvery := 2000
+	for i, c := range validated {
 		sem <- struct{}{}
 		wg.Add(1)
 		go func(c *models.Candidate) {
@@ -85,8 +86,20 @@ func (a *App) executeMoves(_ context.Context, report *models.ScanReport, sel map
 				"retention_until": manifest.RetentionUntil.Format("2006-01-02"),
 			})
 		}(c)
+		// periodic persist so a crash mid-batch does not lose the manifest
+		if (i+1)%persistEvery == 0 {
+			if perr := a.quarantine.Persist(); perr != nil && firstErr == nil {
+				mu.Lock()
+				firstErr = fmt.Errorf("persist manifest: %w", perr)
+				mu.Unlock()
+			}
+		}
 	}
 	wg.Wait()
+	// Persist the whole manifest once at the end (fast batch).
+	if perr := a.quarantine.Persist(); perr != nil && firstErr == nil {
+		firstErr = fmt.Errorf("persist manifest: %w", perr)
+	}
 
 	return ui.MoveOutcome{Succeeded: succeeded, Failed: failed, Freed: freed, Err: firstErr}
 }

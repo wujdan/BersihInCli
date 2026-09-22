@@ -190,6 +190,38 @@ func TestPurgeExpired_SingleID(t *testing.T) {
 	}
 }
 
+func TestPersistWritesManifestToDisk(t *testing.T) {
+	dir := t.TempDir()
+	cfg := testCfg(dir)
+	q, _ := New(cfg)
+
+	src := filepath.Join(dir, "p.tmp")
+	os.WriteFile(src, []byte("batched"), 0o644)
+	info, _ := os.Stat(src)
+	meta := &models.FileMeta{Path: src, Size: info.Size(), ModTime: info.ModTime(), Extension: ".tmp"}
+	c := &models.Candidate{Meta: meta, Category: models.CategoryCache, Label: models.LabelSafe}
+	if _, err := q.MoveFile(c); err != nil {
+		t.Fatal(err)
+	}
+	// manifest belum ditulis otomatis per-file; Persist menulisnya sekaligus
+	if err := q.Persist(); err != nil {
+		t.Fatal("Persist error:", err)
+	}
+	raw, err := os.ReadFile(q.manifestsFile())
+	if err != nil {
+		t.Fatal("manifest file tidak ada setelah Persist:", err)
+	}
+	if len(raw) == 0 {
+		t.Fatal("manifest kosong")
+	}
+
+	// reload dari disk harus memulihkan isi yang sama
+	q2, _ := New(cfg)
+	if q2.Count() != 1 {
+		t.Errorf("Count setelah reload = %d, want 1", q2.Count())
+	}
+}
+
 func TestRetentionFor_PerCategory(t *testing.T) {
 	cfg := config.Default()
 	// cfg default: CacheTemp=14, LogDup=30, LargeOld=90
@@ -203,6 +235,7 @@ func TestRetentionFor_PerCategory(t *testing.T) {
 		{models.CategoryDuplicate, 30},
 		{models.CategoryLargeOld, 90},
 		{models.CategoryInstaller, 90},
+		{models.CategoryOrphan, 90},
 	}
 	for _, tc := range cases {
 		got := q.retentionFor(tc.cat)

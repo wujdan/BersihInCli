@@ -1,7 +1,9 @@
 package classifier
 
 import (
+	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -207,5 +209,42 @@ func TestClassify_LargeOldAndNotAccessedIsCandidate(t *testing.T) {
 	}
 	if got.Category != models.CategoryLargeOld {
 		t.Errorf("catgegory = %q, want %q", got.Category, models.CategoryLargeOld)
+	}
+}
+
+func TestClassify_OrphanAppData(t *testing.T) {
+	root := os.Getenv("LOCALAPPDATA")
+	if root == "" {
+		t.Skip("LOCALAPPDATA tidak tersedia")
+	}
+	c := New(testCfg())
+	// token acak dijamin tidak pernah terdaftar sebagai aplikasi terpasang
+	token := "zzorphan_" + strconv.FormatInt(time.Now().UnixNano(), 36)
+	f := meta(filepath.Join(root, token, "data.bin"), 1024, 200)
+	got := c.Classify(f, "")
+	if got == nil {
+		t.Fatal("want orphan candidate, got nil")
+	}
+	if got.Category != models.CategoryOrphan {
+		t.Errorf("category = %q, want %q", got.Category, models.CategoryOrphan)
+	}
+	if got.Confidence != 0.62 {
+		t.Errorf("confidence = %.2f, want 0.62", got.Confidence)
+	}
+	if got.Label != models.LabelReview {
+		t.Errorf("label = %q, want %q", got.Label, models.LabelReview)
+	}
+}
+
+func TestClassify_KnownSafeAppDataDirIsSafe(t *testing.T) {
+	root := os.Getenv("LOCALAPPDATA")
+	if root == "" {
+		t.Skip("LOCALAPPDATA tidak tersedia")
+	}
+	c := New(testCfg())
+	// "Microsoft" masuk knownSafeFolderNames → tidak pernah diklaim orphan
+	f := meta(filepath.Join(root, "Microsoft", "Windows", "data.bin"), 1024, 200)
+	if got := c.Classify(f, ""); got != nil {
+		t.Errorf("folder app-data milik sistem harus aman, got %+v", got)
 	}
 }

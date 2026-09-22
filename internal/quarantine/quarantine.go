@@ -87,19 +87,13 @@ func (q *Dir) loadManifests() error {
 func (q *Dir) persist() error {
 	q.mu.Lock()
 	defer q.mu.Unlock()
-	list := make([]*Manifest, 0, len(q.manifests))
-	for _, m := range q.manifests {
-		list = append(list, m)
-	}
-	data, err := json.MarshalIndent(list, "", "  ")
-	if err != nil {
-		return err
-	}
-	tmp := q.manifestsFile() + ".tmp"
-	if err := os.WriteFile(tmp, data, 0o644); err != nil {
-		return err
-	}
-	return os.Rename(tmp, q.manifestsFile())
+	return q.persistLocked()
+}
+
+// Persist writes the current manifest list to disk. Call it once after
+// a batch of moves (instead of once per file) to avoid O(n²) serialization.
+func (q *Dir) Persist() error {
+	return q.persist()
 }
 
 // retentionFor returns the retention days for a category (tahap 10 tiers).
@@ -154,9 +148,6 @@ func (q *Dir) MoveFile(c *models.Candidate) (*Manifest, error) {
 	q.mu.Lock()
 	q.manifests[id] = m
 	q.mu.Unlock()
-	if err := q.persist(); err != nil {
-		return m, fmt.Errorf("persist manifest: %w", err)
-	}
 	return m, nil
 }
 

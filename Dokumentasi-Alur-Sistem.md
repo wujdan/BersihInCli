@@ -1,7 +1,7 @@
 # Dokumentasi Alur Sistem — Bersihin (Storage Optimizer)
 
-**Versi:** 1.1.0
-**Tanggal:** 11 September 2026
+**Versi:** 1.1.1
+**Tanggal:** 22 September 2026
 **Status:** Lengkap (GUI Desktop + CLI)
 
 ---
@@ -158,10 +158,17 @@ File masuk
    │
    ├─ ⑤ Duplikat? ────────────────→ Kandidat 88% (REVIEW)
    │
-   ├─ ⑥ Diubah ≤30 hari? ──────────→ SELAMATKAN (diduga dipakai)
+   ├─ ⑥ Sisa aplikasi terhapus? ──→ Kandidat 62% (REVIEW) · Windows only
    │
-   └─ ⑦ Besar ≥100MB & lama ≥365 hari? → Kandidat 55% (REVIEW)
+   ├─ ⑦ Diubah ≤30 hari? ──────────→ SELAMATKAN (diduga dipakai)
+   │
+   └─ ⑧ Besar ≥100MB & lama ≥365 hari? → Kandidat 55% (REVIEW)
 ```
+
+> Deteksi orphan (⑥) membaca daftar aplikasi terpasang dari registry Windows
+> (HKLM/HKCU · Uninstall, termasuk view WOW6432Node) kemudian memberi label
+> REVIEW — confidence 62% moderat karena deteksi berbasis pendekatan registry;
+> pengguna tetap diminta memverifikasi sebelum pemindahan.
 
 > Aturan cache/temp (②) diproses **sebelum** batas umur (⑥): berada di folder
 > cache/temp sudah cukup sinyal, dan file yang sedang terpakai akan tertangkap
@@ -439,6 +446,7 @@ storage-optimizer config --generate     # buat file konfigurasi
 | **Log Files** | `.log` `.logs` `.logt`, berumur ≥ 90 hari | **94%** | AMAN | 30 hari |
 | **Installer Lama** | `.msi` `.msix` `.dmg` `.pkg` `.deb` `.rpm`, berumur ≥ 90 hari | **68%** | REVIEW | 90 hari |
 | **Duplikat** | Hash SHA-256 sama & ukuran ≥ 1 MB | **88%** | REVIEW | 30 hari |
+| **Sisa Aplikasi Terhapus** | App-data (Local/Roaming/LocalLow/ProgramData) yang aplikasinya sudah tak terpasang — via registry Uninstall (Windows) | **62%** | REVIEW | 90 hari |
 | **File Besar Tidak Terpakai** | Ukuran ≥ 100 MB & tidak disentuh ≥ 365 hari | **55%** | REVIEW | 90 hari |
 
 ### Label
@@ -665,7 +673,7 @@ PILIH FOLDER/DRIVE
   DETEKSI DUPLIKAT (SHA-256)
         │
         ▼
- SCAN SELESAI → SORTIR KE 5 KATEGORI
+ SCAN SELESAI → SORTIR KE 6 KATEGORI
         │
         ▼
   DASHBOARD (checkbox per kategori/file)

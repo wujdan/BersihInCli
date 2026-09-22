@@ -28,6 +28,7 @@ func catColor(cat models.Category) lipgloss.Style {
 		models.CategoryInstaller: "214",
 		models.CategoryLargeOld:  "209",
 		models.CategoryDuplicate: "175",
+		models.CategoryOrphan:    "135",
 	}
 	if c, ok := m[cat]; ok {
 		return lipgloss.NewStyle().Foreground(lipgloss.Color(c))

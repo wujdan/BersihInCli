@@ -11,7 +11,7 @@
 
 - **Scan penyimpanan multi-drive** - mode full (semua drive), quick (folder umum), custom (folder spesifik)
 - **Deteksi file duplikat** - via hash SHA-256
-- **Klasifikasi otomatis + confidence score** - cache, temp, log, installer, file besar
+- **Klasifikasi otomatis + confidence score** - cache, temp, log, installer, file besar, sisa aplikasi terhapus
 - **Auto-clean cache/temp/log** - dipindah ke karantina, bukan hapus langsung
 - **Dashboard TUI interaktif** - pilih per file atau per kategori
 - **Karantina wajib** - file bisa dipulihkan kapan saja

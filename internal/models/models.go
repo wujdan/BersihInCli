@@ -25,6 +25,7 @@ const (
 	CategoryInstaller Category = "Installer Lama"
 	CategoryLargeOld  Category = "File Besar Tidak Terpakai"
 	CategoryDuplicate Category = "Duplikat"
+	CategoryOrphan    Category = "Sisa Aplikasi Terhapus"
 )
 
 // CategoryColors provides ANSI color names per category (used by UI).
@@ -40,6 +41,8 @@ func (c Category) Color() string {
 		return "orange/red"
 	case CategoryDuplicate:
 		return "blue"
+	case CategoryOrphan:
+		return "purple"
 	default:
 		return "white"
 	}
@@ -67,7 +70,7 @@ func (f *FileMeta) Dir() string {
 
 // Candidate is a file flagged as a removable candidate.
 type Candidate struct {
-	Meta           *FileMeta `json:"-"`
+	Meta           *FileMeta `json:"meta"`
 	Label          Label     `json:"label"`
 	Category       Category  `json:"category"`
 	Confidence     float64   `json:"confidence"`
@@ -75,8 +78,12 @@ type Candidate struct {
 	Reason         string    `json:"reason"`
 }
 
-// Key returns a stable id for a candidate.
+// Key returns a stable id for a candidate. Returns empty string when the
+// file metadata is unavailable (e.g. loaded from an older report).
 func (c *Candidate) Key() string {
+	if c == nil || c.Meta == nil {
+		return ""
+	}
 	return c.Meta.Path
 }
 
@@ -109,9 +116,13 @@ func (r *ScanReport) ByCategory() []*CategorySummary {
 		CategoryInstaller,
 		CategoryLargeOld,
 		CategoryDuplicate,
+		CategoryOrphan,
 	}
 	sums := make(map[Category]*CategorySummary)
 	for _, c := range r.Candidates {
+		if c == nil || c.Meta == nil {
+			continue
+		}
 		s := sums[c.Category]
 		if s == nil {
 			s = &CategorySummary{Category: c.Category}
@@ -138,6 +149,9 @@ func (r *ScanReport) ByCategory() []*CategorySummary {
 func (r *ScanReport) TotalSelected(selected map[string]bool) (int, int64) {
 	count, size := 0, int64(0)
 	for _, c := range r.Candidates {
+		if c == nil || c.Meta == nil {
+			continue
+		}
 		if selected[c.Key()] {
 			count++
 			size += c.Meta.Size
