@@ -5,7 +5,7 @@
 
 ![Go](https://img.shields.io/badge/Go-1.27-blue)
 ![Platform](https://img.shields.io/badge/Windows%20%7C%20Linux%20%7C%20macOS-lightgrey)
-![License](https://img.shields.io/badge/License-MIT-green)
+![GitHub License](https://img.shields.io/github/license/wujdan/BersihInCli)
 
 ## Fitur Utama
 
@@ -163,4 +163,4 @@ Pull request dan issue diterima di GitHub. Dokumentasi lengkap: `Dokumentasi-Alu
 
 ## Lisensi
 
-[MIT](LICENSE) — Copyright (c) 2026 Danss
+[MIT](LICENSE) © 2026 Danss
